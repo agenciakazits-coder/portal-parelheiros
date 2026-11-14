@@ -4,102 +4,84 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guia Parelheiros - Comércio e Serviços do Bairro</title>
-    <script src="https://tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans">
+<body>
 
-    <!-- Cabeçalho -->
-    <header class="bg-emerald-700 text-white shadow-md sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+    <header>
+        <div class="container header-content">
             <div>
-                <h1 class="text-xl md:text-2xl font-bold tracking-tight">Guia Parelheiros</h1>
-                <p class="text-xs text-emerald-100">Tudo o que você precisa perto de você</p>
+                <h1>Guia Parelheiros</h1>
+                <p>Tudo o que você precisa perto de você</p>
             </div>
-            <button onclick="abrirModalLogin()" class="bg-white text-emerald-800 font-semibold px-4 py-2 rounded-lg text-sm hover:bg-emerald-50 transition">
+            <button onclick="abrirModalLogin()" class="btn-anunciante">
                 Área do Anunciante
             </button>
         </div>
     </header>
 
-    <!-- Banner Principal Rotativo (Destaque Pago) -->
-    <section class="max-w-6xl mx-auto px-4 mt-6">
-        <div class="relative bg-gray-900 rounded-xl overflow-hidden shadow-lg aspect-[16/7] md:aspect-[21/7] flex items-center justify-center">
-            <img id="banner-img" src="https://placehold.co" alt="Banner Comercial" class="w-full h-full object-cover opacity-90">
-            <div class="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded">
-                Patrocinado
-            </div>
+    <section class="container banner-section">
+        <div class="banner-box">
+            <img id="banner-img" src="https://placehold.co" alt="Banner Comercial">
+            <div class="badge-patrocinado">Patrocinado</div>
         </div>
     </section>
 
-    <!-- Busca Rápida -->
-    <section class="max-w-6xl mx-auto px-4 mt-8">
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-3">
-            <input type="text" id="campo-busca" placeholder="O que você procura em Parelheiros? (Ex: pizzaria, farmácia, oficina...)" class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-emerald-600">
-            <button onclick="filtrarAnuncios()" class="bg-emerald-600 text-white font-semibold px-6 py-2 rounded-lg hover:bg-emerald-700 transition">
-                Buscar
-            </button>
+    <section class="container">
+        <div class="busca-box">
+            <input type="text" id="campo-busca" placeholder="O que você procura em Parelheiros? (Ex: pizzaria, farmácia, oficina...)">
+            <button onclick="filtrarAnuncios()" class="btn-buscar">Buscar</button>
         </div>
     </section>
 
-    <!-- Lista de Comércios do Bairro -->
-    <main class="max-w-6xl mx-auto px-4 mt-8">
-        <h2 class="text-lg font-bold text-gray-800 mb-4">Destaques do Bairro</h2>
-        <div id="lista-comercios" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Exemplo de Card de Anúncio -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition">
-                <img src="https://placehold.co" alt="Comércio" class="w-full h-40 object-cover">
-                <div class="p-4">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-emerald-600">Alimentação</span>
-                    <h3 class="font-bold text-lg mt-1">Padaria Pão Quente</h3>
-                    <p class="text-sm text-gray-600 mt-1">Pães frescos toda hora, bolos e café da manhã completo no centro de Parelheiros.</p>
-                    <a href="https://wa.me" target="_blank" class="mt-4 block text-center bg-green-600 text-white text-sm font-semibold py-2 rounded-lg hover:bg-green-700">
-                        Chamar no WhatsApp
-                    </a>
+    <main class="container">
+        <h2 class="secao-titulo">Destaques do Bairro</h2>
+        <div id="lista-comercios" class="grid-comercios">
+            <div class="card-comercio">
+                <img src="https://placehold.co" alt="Padaria">
+                <div class="card-body">
+                    <span class="categoria">Alimentação</span>
+                    <h3>Padaria Pão Quente</h3>
+                    <p>Pães frescos toda hora, bolos e café da manhã completo no centro de Parelheiros.</p>
+                    <a href="https://wa.me" target="_blank" class="btn-whats">Chamar no WhatsApp</a>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Área de Newsletter -->
-    <section class="max-w-6xl mx-auto px-4 mt-12 mb-12">
-        <div class="bg-emerald-800 text-white rounded-2xl p-6 md:p-10 text-center shadow-lg">
-            <h2 class="text-2xl font-bold">Receba promoções e novidades do bairro</h2>
-            <p class="text-emerald-100 text-sm mt-2 max-w-xl mx-auto">Cadastre seu e-mail ou WhatsApp para receber cupons de desconto dos comerciantes locais toda semana.</p>
-            <form id="form-newsletter" onsubmit="salvarNewsletter(event)" class="mt-6 flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
-                <input type="text" id="news-nome" required placeholder="Seu nome" class="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:outline-none">
-                <input type="email" id="news-email" required placeholder="Seu melhor e-mail" class="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:outline-none">
-                <button type="submit" class="bg-amber-400 text-gray-900 font-bold px-6 py-3 rounded-lg hover:bg-amber-300 transition">
-                    Cadastrar
-                </button>
+    <section class="container">
+        <div class="newsletter-box">
+            <h2>Receba promoções e novidades do bairro</h2>
+            <p>Cadastre seu e-mail para receber cupons de desconto dos comerciantes locais toda semana.</p>
+            <form id="form-newsletter" onsubmit="salvarNewsletter(event)" class="form-news">
+                <input type="text" id="news-nome" required placeholder="Seu nome">
+                <input type="email" id="news-email" required placeholder="Seu melhor e-mail">
+                <button type="submit" class="btn-news">Cadastrar</button>
             </form>
-            <p id="msg-newsletter" class="text-xs text-emerald-200 mt-3 hidden">Cadastro realizado com sucesso!</p>
+            <p id="msg-newsletter" style="display:none; margin-top:12px; font-weight:bold;">Cadastro realizado com sucesso!</p>
         </div>
     </section>
 
-    <!-- Modal de Login (Admin e Comerciantes) -->
-    <div id="modal-login" class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl max-w-md w-full p-6 relative">
-            <button onclick="fecharModalLogin()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">✕</button>
-            <h3 class="text-xl font-bold text-gray-800">Acesso ao Painel</h3>
-            <p class="text-sm text-gray-500 mt-1">Entre para gerenciar seus anúncios ou administrar o portal.</p>
-            <form onsubmit="fazerLogin(event)" class="mt-4 space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">E-mail</label>
-                    <input type="email" required class="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1">
+    <div id="modal-login" class="modal">
+        <div class="modal-card">
+            <button onclick="fecharModalLogin()" class="fechar-modal">✕</button>
+            <h3>Acesso ao Painel</h3>
+            <p style="font-size:0.85rem; color:#6b7280; margin-top:4px;">Entre para gerenciar seus anúncios.</p>
+            <form onsubmit="fazerLogin(event)">
+                <div class="campo-form">
+                    <label>E-mail</label>
+                    <input type="email" required>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Senha</label>
-                    <input type="password" required class="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1">
+                <div class="campo-form">
+                    <label>Senha</label>
+                    <input type="password" required>
                 </div>
-                <button type="submit" class="w-full bg-emerald-700 text-white font-semibold py-2.5 rounded-lg hover:bg-emerald-800">
-                    Entrar no Sistema
-                </button>
+                <button type="submit" class="btn-entrar">Entrar no Sistema</button>
             </form>
         </div>
     </div>
 
     <script>
-        // Rotação simples de banners de exemplo
         const banners = [
             "https://placehold.co",
             "https://placehold.co",
@@ -112,24 +94,22 @@
         }, 4000);
 
         function abrirModalLogin() {
-            document.getElementById('modal-login').classList.remove('hidden');
-            document.getElementById('modal-login').classList.add('flex');
+            document.getElementById('modal-login').classList.add('ativo');
         }
 
         function fecharModalLogin() {
-            document.getElementById('modal-login').classList.add('hidden');
-            document.getElementById('modal-login').classList.remove('flex');
+            document.getElementById('modal-login').classList.remove('ativo');
         }
 
         function salvarNewsletter(e) {
             e.preventDefault();
-            document.getElementById('msg-newsletter').classList.remove('hidden');
+            document.getElementById('msg-newsletter').style.display = 'block';
             e.target.reset();
         }
 
         function fazerLogin(e) {
             e.preventDefault();
-            alert("Próximo passo: conectar este login ao banco de dados Supabase para abrir o painel do comerciante ou administrador.");
+            alert("Login visual funcionando! Próximo passo: conectar ao painel.");
         }
     </script>
 </body>
