@@ -1,5 +1,5 @@
 const SUPABASE_URL = 'https://supabase.co';
-const SUPABASE_KEY = 'sb_publishable_0ssBssTucmaMtL1EkxIIjA_L63HpwNn';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3cWFxcGlvY3N4ZGdmaHRzaWh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ2NzIyNzcsImV4cCI6MjExMDI0ODI3N30.SaC_kekEhFusvRkrimsV5LqApdtdKsI2N0gZihjLQNY';
 const EMAIL_ADMIN = 'agenciakazits@gmail.com';
 
 let modoAuth = 'login';
