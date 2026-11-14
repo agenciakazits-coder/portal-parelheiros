@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Anunciante - Guia Parelheiros</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://jsdelivr.net"></script>
+    <style>
+        .painel-box { background: white; border-radius: 12px; padding: 24px; margin-top: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px; }
+        .tab-btn { background: #f3f4f6; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+        .tab-btn.ativa { background: #047857; color: white; }
+        .select-input, .textarea-input { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; }
+        .badge-status { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; }
+        .status-aprovado { background: #d1fae5; color: #065f46; }
+        .status-pendente { background: #fef3c7; color: #92400e; }
+        .btn-acao { border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; margin-right: 6px; margin-top: 8px; }
+        .btn-aprovar { background: #059669; color: white; }
+        .btn-topo { background: #2563eb; color: white; }
+        .btn-excluir { background: #dc2626; color: white; }
+        .tabela-news { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.9rem; }
+        .tabela-news th, .tabela-news td { border-bottom: 1px solid #e5e7eb; padding: 10px; text-align: left; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container header-content">
+            <div>
+                <h1>Painel Guia Parelheiros</h1>
+                <p id="usuario-logado-texto">Acesso restrito a anunciantes e administração</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+                <a href="index.html" class="btn-anunciante" style="text-decoration:none;">Ver Site</a>
+                <button id="btn-sair" onclick="sair()" class="btn-anunciante" style="display:none; background:#fee2e2; color:#991b1b;">Sair</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container" style="margin-bottom: 50px;">
+
+        <div id="tela-auth" class="painel-box" style="max-width: 440px; margin: 40px auto;">
+            <div class="tabs">
+                <button id="tab-login" class="tab-btn ativa" onclick="mudarAbaAuth('login')">Entrar</button>
+                <button id="tab-cadastro" class="tab-btn" onclick="mudarAbaAuth('cadastro')">Criar Conta de Comerciante</button>
+            </div>
+
+            <form id="form-auth" onsubmit="processarAuth(event)">
+                <div id="campo-empresa" class="campo-form" style="display:none;">
+                    <label>Nome do Comércio ou Empresa</label>
+                    <input type="text" id="auth-empresa" placeholder="Ex: Pizzaria do Bairro">
+                </div>
+                <div class="campo-form">
+                    <label>E-mail</label>
+                    <input type="email" id="auth-email" required placeholder="seu@email.com">
+                </div>
+                <div class="campo-form">
+                    <label>Senha (mínimo 6 caracteres)</label>
+                    <input type="password" id="auth-senha" required minlength="6" placeholder="******">
+                </div>
+                <button type="submit" id="btn-auth-submit" class="btn-entrar">Entrar no Painel</button>
+            </form>
+            <p id="msg-auth" style="margin-top:12px; font-size:0.85rem; color:#dc2626; font-weight:600;"></p>
+        </div>
+
+        <div id="tela-sistema" style="display:none;">
+
+            <div class="painel-box">
+                <h2 style="font-size:1.2rem; margin-bottom:4px;">Cadastrar Novo Anúncio ou Banner</h2>
+                <p style="font-size:0.85rem; color:#6b7280; margin-bottom:16px;">Envie a imagem do seu comércio. Após aprovação do administrador, ela aparecerá no portal.</p>
+
+                <form id="form-anuncio" onsubmit="criarAnuncio(event)">
+                    <div class="campo-form">
+                        <label>Nome do Comércio / Título do Anúncio</label>
+                        <input type="text" id="anuncio-titulo" required placeholder="Ex: Mercado Central Parelheiros">
+                    </div>
+
+                    <div class="campo-form">
+                        <label>Categoria</label>
+                        <select id="anuncio-categoria" class="select-input">
+                            <option value="Alimentação">Alimentação (Padaria, Pizzaria, Lanchonete)</option>
+                            <option value="Mercados e Comércio">Mercados e Comércio</option>
+                            <option value="Saúde e Beleza">Saúde, Farmácia e Beleza</option>
+                            <option value="Auto e Serviços">Oficinas, Auto Elétrica e Serviços</option>
+                            <option value="Construção e Casa">Material de Construção e Casa</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+
+                    <div class="campo-form">
+                        <label>WhatsApp com DDD (apenas números)</label>
+                        <input type="text" id="anuncio-whats" required placeholder="Ex: 11999999999">
+                    </div>
+
+                    <div class="campo-form">
+                        <label>Descrição curta da oferta ou serviço</label>
+                        <textarea id="anuncio-desc" rows="2" class="textarea-input" placeholder="Ex: Entregamos em toda região de Parelheiros e Vargem Grande."></textarea>
+                    </div>
+
+                    <div class="campo-form">
+                        <label>Imagem do Banner (Foto do celular ou computador)</label>
+                        <input type="file" id="anuncio-arquivo" accept="image/*" required style="border:none; padding:6px 0;">
+                    </div>
+
+                    <button type="submit" id="btn-salvar-anuncio" class="btn-entrar">Enviar Anúncio</button>
+                </form>
+            </div>
+
+            <div class="painel-box">
+                <h2 id="titulo-lista-anuncios" style="font-size:1.2rem; margin-bottom:16px;">Meus Anúncios</h2>
+                <div id="lista-painel-anuncios" class="grid-comercios"></div>
+            </div>
+
+            <div id="box-admin-newsletter" class="painel-box" style="display:none;">
+                <h2 style="font-size:1.2rem; margin-bottom:4px;">Contatos Capturados na Newsletter (Admin)</h2>
+                <p style="font-size:0.85rem; color:#6b7280; margin-bottom:12px;">Moradores do bairro que se cadastraram para receber promoções.</p>
+                <div style="overflow-x:auto;">
+                    <table class="tabela-news">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>E-mail</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpo-tabela-news"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+    <script>
+        const SUPABASE_URL = 'https://swqaqpiocsxdgfhtsihv.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_0ssBssTucmaMtL1EkxIIjA_L63HpwNn';
+        const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const EMAIL_ADMIN = 'agenciakazits@gmail.com';
+
+        let modoAuth = 'login';
+        let usuarioAtual = null;
+        let ehAdmin = false;
+
+        function mudarAbaAuth(modo) {
+            modoAuth = modo;
+            document.getElementById('tab-login').classList.toggle('ativa', modo === 'login');
+            document.getElementById('tab-cadastro').classList.toggle('ativa', modo === 'cadastro');
+            document.getElementById('campo-empresa').style.display = modo === 'cadastro' ? 'block' : 'none';
+            document.getElementById('btn-auth-submit').textContent = modo === 'login' ? 'Entrar no Painel' : 'Criar Conta e Entrar';
+            document.getElementById('msg-auth').textContent = '';
+        }
+
+        async function processarAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-senha').value;
+            const empresa = document.getElementById('auth-empresa').value.trim();
+            const msg = document.getElementById('msg-auth');
+            const btn = document.getElementById('btn-auth-submit');
+
+            btn.disabled = true;
+            msg.textContent = 'Aguarde...';
+
+            if (modoAuth === 'cadastro') {
+                const { data, error } = await db.auth.signUp({ email, password });
+                if (error) {
+                    msg.textContent = 'Erro ao cadastrar: ' + error.message;
+                    btn.disabled = false;
+                    return;
+                }
+                if (data.user) {
+                    const tipoUsuario = (email.toLowerCase() === EMAIL_ADMIN.toLowerCase()) ? 'admin' : 'comerciante';
+                    await db.from('perfis').insert([{
+                        id: data.user.id,
+                        email: email,
+                        nome_empresa: empresa || 'Comércio Local',
+                        tipo: tipoUsuario
+                    }]);
+                }
+            } else {
+                const { error } = await db.auth.signInWithPassword({ email, password });
+                if (error) {
+                    msg.textContent = 'E-mail ou senha incorretos.';
+                    btn.disabled = false;
+                    return;
+                }
+            }
+
+            btn.disabled = false;
+            verificarSessao();
+        }
+
+        async function verificarSessao() {
+            const { data: { session } } = await db.auth.getSession();
+            if (!session) {
+                document.getElementById('tela-auth').style.display = 'block';
+                document.getElementById('tela-sistema').style.display = 'none';
+                document.getElementById('btn-sair').style.display = 'none';
+                return;
+            }
+
+            usuarioAtual = session.user;
+            document.getElementById('tela-auth').style.display = 'none';
+            document.getElementById('tela-sistema').style.display = 'block';
+            document.getElementById('btn-sair').style.display = 'inline-block';
+
+            const { data: perfil } = await db.from('perfis').select('*').eq('id', usuarioAtual.id).single();
+            ehAdmin = (perfil && perfil.tipo === 'admin') || (usuarioAtual.email.toLowerCase() === EMAIL_ADMIN.toLowerCase());
+
+            document.getElementById('usuario-logado-texto').textContent = ehAdmin 
+                ? `Logado como ADMINISTRADOR (${usuarioAtual.email})` 
+                : `Logado como Anunciante (${usuarioAtual.email})`;
+
+            if (ehAdmin) {
+                document.getElementById('titulo-lista-anuncios').textContent = 'Gerenciar Todos os Anúncios do Portal (Admin)';
+                document.getElementById('box-admin-newsletter').style.display = 'block';
+                carregarNewsletter();
+            }
+
+            carregarAnunciosPainel();
+        }
+
+        async function criarAnuncio(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-salvar-anuncio');
+            const inputArquivo = document.getElementById('anuncio-arquivo');
+            const arquivo = inputArquivo.files[0];
+
+            if (!arquivo) {
+                alert('Selecione uma imagem primeiro.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Enviando imagem...';
+
+            const nomeArquivo = `${Date.now()}_${arquivo.name.replace(/[^a-zA-Z0-9.]/g, '')}`;
+            const { error: uploadError } = await db.storage.from('banners').upload(nomeArquivo, arquivo);
+
+            if (uploadError) {
+                alert('Erro ao enviar imagem: ' + uploadError.message);
+                btn.disabled = false;
+                btn.textContent = 'Enviar Anúncio';
+                return;
+            }
+
+            const { data: urlData } = db.storage.from('banners').getPublicUrl(nomeArquivo);
+
+            const novoAnuncio = {
+                usuario_id: usuarioAtual.id,
+                titulo: document.getElementById('anuncio-titulo').value,
+                categoria: document.getElementById('anuncio-categoria').value,
+                whatsapp: document.getElementById('anuncio-whats').value,
+                descricao: document.getElementById('anuncio-desc').value,
+                imagem_url: urlData.publicUrl,
+                aprovado: ehAdmin ? true : false,
+                destaque_topo: false
+            };
+
+            const { error: insertError } = await db.from('anuncios').insert([novoAnuncio]);
+
+            if (insertError) {
+                alert('Erro ao salvar anúncio: ' + insertError.message);
+            } else {
+                alert(ehAdmin ? 'Anúncio publicado no site!' : 'Anúncio enviado! Aguarde a aprovação do administrador.');
+                e.target.reset();
+                carregarAnunciosPainel();
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Enviar Anúncio';
+        }
+
+        async function carregarAnunciosPainel() {
+            let query = db.from('anuncios').select('*').order('criado_em', { ascending: false });
+            if (!ehAdmin) {
+                query = query.eq('usuario_id', usuarioAtual.id);
+            }
+
+            const { data } = await query;
+            const lista = data || [];
+            const container = document.getElementById('lista-painel-anuncios');
+
+            if (lista.length === 0) {
+                container.innerHTML = '<p style="color:#6b7280;">Nenhum anúncio cadastrado ainda.</p>';
+                return;
+            }
+
+            container.innerHTML = lista.map(item => `
+                <div class="card-comercio">
+                    <img src="${item.imagem_url}" alt="${item.titulo}">
+                    <div class="card-body">
+                        <span class="badge-status ${item.aprovado ? 'status-aprovado' : 'status-pendente'}">
+                            ${item.aprovado ? 'No Ar (Aprovado)' : 'Aguardando Aprovação'}
+                        </span>
+                        ${item.destaque_topo ? '<span class="badge-status" style="background:#dbeafe; color:#1e40af; margin-left:4px;">Banner Topo</span>' : ''}
+                        <h3 style="margin-top:8px;">${item.titulo}</h3>
+                        <p>${item.categoria} • Whats: ${item.whatsapp}</p>
+                        
+                        <div style="margin-top:10px;">
+                            ${ehAdmin ? `
+                                <button onclick="alternarAprovacao('${item.id}', ${!item.aprovado})" class="btn-acao btn-aprovar">
+                                    ${item.aprovado ? 'Pausar' : 'Aprovar'}
+                                </button>
+                                <button onclick="alternarBannerTopo('${item.id}', ${!item.destaque_topo})" class="btn-acao btn-topo">
+                                    ${item.destaque_topo ? 'Tirar do Topo' : 'Por no Banner Topo'}
+                                </button>
+                            ` : ''}
+                            <button onclick="excluirAnuncio('${item.id}')" class="btn-acao btn-excluir">Excluir</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function alternarAprovacao(id, novoStatus) {
+            await db.from('anuncios').update({ aprovado: novoStatus }).eq('id', id);
+            carregarAnunciosPainel();
+        }
+
+        async function alternarBannerTopo(id, novoStatus) {
+            await db.from('anuncios').update({ destaque_topo: novoStatus, aprovado: true }).eq('id', id);
+            carregarAnunciosPainel();
+        }
+
+        async function excluirAnuncio(id) {
+            if (!confirm('Tem certeza que deseja apagar este anúncio?')) return;
+            await db.from('anuncios').delete().eq('id', id);
+            carregarAnunciosPainel();
+        }
+
+        async function carregarNewsletter() {
+            const { data } = await db.from('newsletter').select('*').order('criado_em', { ascending: false });
+            const corpo = document.getElementById('corpo-tabela-news');
+            corpo.innerHTML = (data || []).map(row => `
+                <tr>
+                    <td>${row.nome}</td>
+                    <td>${row.email}</td>
+                    <td>${new Date(row.criado_em).toLocaleDateString('pt-BR')}</td>
+                </tr>
+            `).join('');
+        }
+
+        async function sair() {
+            await db.auth.signOut();
+            verificarSessao();
+        }
+
+        verificarSessao();
+    </script>
+</body>
+</html>

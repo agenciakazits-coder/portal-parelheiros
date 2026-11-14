@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guia Parelheiros - Comércio e Serviços do Bairro</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://jsdelivr.net"></script>
 </head>
 <body>
 
@@ -14,22 +15,24 @@
                 <h1>Guia Parelheiros</h1>
                 <p>Tudo o que você precisa perto de você</p>
             </div>
-            <button onclick="abrirModalLogin()" class="btn-anunciante">
+            <a href="painel.html" class="btn-anunciante" style="text-decoration:none;">
                 Área do Anunciante
-            </button>
+            </a>
         </div>
     </header>
 
     <section class="container banner-section">
         <div class="banner-box">
-            <img id="banner-img" src="https://placehold.co" alt="Banner Comercial">
+            <a id="banner-link" href="#newsletter-area">
+                <img id="banner-img" src="https://placehold.co" alt="Banner Comercial">
+            </a>
             <div class="badge-patrocinado">Patrocinado</div>
         </div>
     </section>
 
     <section class="container">
         <div class="busca-box">
-            <input type="text" id="campo-busca" placeholder="O que você procura em Parelheiros? (Ex: pizzaria, farmácia, oficina...)">
+            <input type="text" id="campo-busca" onkeyup="filtrarAnuncios()" placeholder="O que você procura em Parelheiros? (Ex: pizzaria, farmácia, oficina...)">
             <button onclick="filtrarAnuncios()" class="btn-buscar">Buscar</button>
         </div>
     </section>
@@ -37,80 +40,137 @@
     <main class="container">
         <h2 class="secao-titulo">Destaques do Bairro</h2>
         <div id="lista-comercios" class="grid-comercios">
-            <div class="card-comercio">
-                <img src="https://placehold.co" alt="Padaria">
-                <div class="card-body">
-                    <span class="categoria">Alimentação</span>
-                    <h3>Padaria Pão Quente</h3>
-                    <p>Pães frescos toda hora, bolos e café da manhã completo no centro de Parelheiros.</p>
-                    <a href="https://wa.me" target="_blank" class="btn-whats">Chamar no WhatsApp</a>
-                </div>
-            </div>
+            <p style="color:#6b7280;">Carregando comércios de Parelheiros...</p>
         </div>
     </main>
 
-    <section class="container">
+    <section id="newsletter-area" class="container">
         <div class="newsletter-box">
             <h2>Receba promoções e novidades do bairro</h2>
             <p>Cadastre seu e-mail para receber cupons de desconto dos comerciantes locais toda semana.</p>
             <form id="form-newsletter" onsubmit="salvarNewsletter(event)" class="form-news">
                 <input type="text" id="news-nome" required placeholder="Seu nome">
                 <input type="email" id="news-email" required placeholder="Seu melhor e-mail">
-                <button type="submit" class="btn-news">Cadastrar</button>
+                <button type="submit" id="btn-news-submit" class="btn-news">Cadastrar</button>
             </form>
-            <p id="msg-newsletter" style="display:none; margin-top:12px; font-weight:bold;">Cadastro realizado com sucesso!</p>
+            <p id="msg-newsletter" style="display:none; margin-top:12px; font-weight:bold;"></p>
         </div>
     </section>
 
-    <div id="modal-login" class="modal">
-        <div class="modal-card">
-            <button onclick="fecharModalLogin()" class="fechar-modal">✕</button>
-            <h3>Acesso ao Painel</h3>
-            <p style="font-size:0.85rem; color:#6b7280; margin-top:4px;">Entre para gerenciar seus anúncios.</p>
-            <form onsubmit="fazerLogin(event)">
-                <div class="campo-form">
-                    <label>E-mail</label>
-                    <input type="email" required>
-                </div>
-                <div class="campo-form">
-                    <label>Senha</label>
-                    <input type="password" required>
-                </div>
-                <button type="submit" class="btn-entrar">Entrar no Sistema</button>
-            </form>
-        </div>
-    </div>
-
     <script>
-        const banners = [
-            "https://placehold.co",
-            "https://placehold.co",
-            "https://placehold.co"
-        ];
+        const SUPABASE_URL = 'https://swqaqpiocsxdgfhtsihv.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_0ssBssTucmaMtL1EkxIIjA_L63HpwNn';
+        const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let todosAnuncios = [];
+        let bannersTopo = [];
         let indexBanner = 0;
-        setInterval(() => {
-            indexBanner = (indexBanner + 1) % banners.length;
-            document.getElementById('banner-img').src = banners[indexBanner];
-        }, 4000);
 
-        function abrirModalLogin() {
-            document.getElementById('modal-login').classList.add('ativo');
+        async function carregarPortal() {
+            const { data, error } = await db
+                .from('anuncios')
+                .select('*')
+                .eq('aprovado', true)
+                .order('criado_em', { ascending: false });
+
+            if (error) {
+                console.error(error);
+                return;
+            }
+
+            todosAnuncios = data || [];
+            bannersTopo = todosAnuncios.filter(item => item.destaque_topo);
+
+            iniciarRotacaoBanners();
+            renderizarCards(todosAnuncios);
         }
 
-        function fecharModalLogin() {
-            document.getElementById('modal-login').classList.remove('ativo');
+        function iniciarRotacaoBanners() {
+            if (bannersTopo.length === 0) return;
+
+            const atualizarBanner = () => {
+                const atual = bannersTopo[indexBanner];
+                document.getElementById('banner-img').src = atual.imagem_url;
+                if (atual.whatsapp) {
+                    const numLimpo = atual.whatsapp.replace(/\D/g, '');
+                    document.getElementById('banner-link').href = `https://wa.me{numLimpo}`;
+                    document.getElementById('banner-link').target = '_blank';
+                }
+                indexBanner = (indexBanner + 1) % bannersTopo.length;
+            };
+
+            atualizarBanner();
+            if (bannersTopo.length > 1) {
+                setInterval(atualizarBanner, 4500);
+            }
         }
 
-        function salvarNewsletter(e) {
+        function renderizarCards(lista) {
+            const container = document.getElementById('lista-comercios');
+            if (lista.length === 0) {
+                container.innerHTML = '<p style="color:#6b7280;">Nenhum comércio encontrado ainda. Seja o primeiro a anunciar!</p>';
+                return;
+            }
+
+            container.innerHTML = lista.map(item => {
+                const numLimpo = (item.whatsapp || '').replace(/\D/g, '');
+                const botaoWhats = numLimpo 
+                    ? `<a href="https://wa.me{numLimpo}" target="_blank" class="btn-whats">Chamar no WhatsApp</a>` 
+                    : '';
+
+                return `
+                    <div class="card-comercio">
+                        <img src="${item.imagem_url}" alt="${item.titulo}">
+                        <div class="card-body">
+                            <span class="categoria">${item.categoria}</span>
+                            <h3>${item.titulo}</h3>
+                            <p>${item.descricao || ''}</p>
+                            ${botaoWhats}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filtrarAnuncios() {
+            const termo = document.getElementById('campo-busca').value.toLowerCase();
+            const filtrados = todosAnuncios.filter(item => 
+                item.titulo.toLowerCase().includes(termo) || 
+                item.categoria.toLowerCase().includes(termo) ||
+                (item.descricao && item.descricao.toLowerCase().includes(termo))
+            );
+            renderizarCards(filtrados);
+        }
+
+        async function salvarNewsletter(e) {
             e.preventDefault();
-            document.getElementById('msg-newsletter').style.display = 'block';
-            e.target.reset();
+            const btn = document.getElementById('btn-news-submit');
+            const msg = document.getElementById('msg-newsletter');
+            const nome = document.getElementById('news-nome').value;
+            const email = document.getElementById('news-email').value;
+
+            btn.disabled = true;
+            btn.textContent = 'Salvando...';
+
+            const { error } = await db.from('newsletter').insert([{ nome, email }]);
+
+            msg.style.display = 'block';
+            if (error) {
+                msg.textContent = error.code === '23505' 
+                    ? 'Este e-mail já está cadastrado na nossa lista!' 
+                    : 'Erro ao cadastrar. Tente novamente.';
+                msg.style.color = '#fde047';
+            } else {
+                msg.textContent = 'Cadastro realizado com sucesso! Você receberá nossas ofertas.';
+                msg.style.color = '#ffffff';
+                e.target.reset();
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Cadastrar';
         }
 
-        function fazerLogin(e) {
-            e.preventDefault();
-            alert("Login visual funcionando! Próximo passo: conectar ao painel.");
-        }
+        carregarPortal();
     </script>
 </body>
 </html>
