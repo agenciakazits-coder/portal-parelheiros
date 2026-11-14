@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guia Parelheiros - Comércio e Serviços do Bairro</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://jsdelivr.net"></script>
 </head>
 <body>
 
@@ -60,34 +59,31 @@
     <script>
         const SUPABASE_URL = 'https://swqaqpiocsxdgfhtsihv.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_0ssBssTucmaMtL1EkxIIjA_L63HpwNn';
-        const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const HEADERS = {
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_KEY,
+            'Content-Type': 'application/json'
+        };
 
         let todosAnuncios = [];
         let bannersTopo = [];
         let indexBanner = 0;
 
         async function carregarPortal() {
-            const { data, error } = await db
-                .from('anuncios')
-                .select('*')
-                .eq('aprovado', true)
-                .order('criado_em', { ascending: false });
-
-            if (error) {
-                console.error(error);
-                return;
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/anuncios?aprovado=eq.true&order=criado_em.desc`, { headers: HEADERS });
+                const data = await res.json();
+                todosAnuncios = Array.isArray(data) ? data : [];
+                bannersTopo = todosAnuncios.filter(item => item.destaque_topo);
+                iniciarRotacaoBanners();
+                renderizarCards(todosAnuncios);
+            } catch (err) {
+                document.getElementById('lista-comercios').innerHTML = '<p style="color:#6b7280;">Nenhum comércio cadastrado ainda.</p>';
             }
-
-            todosAnuncios = data || [];
-            bannersTopo = todosAnuncios.filter(item => item.destaque_topo);
-
-            iniciarRotacaoBanners();
-            renderizarCards(todosAnuncios);
         }
 
         function iniciarRotacaoBanners() {
             if (bannersTopo.length === 0) return;
-
             const atualizarBanner = () => {
                 const atual = bannersTopo[indexBanner];
                 document.getElementById('banner-img').src = atual.imagem_url;
@@ -98,11 +94,8 @@
                 }
                 indexBanner = (indexBanner + 1) % bannersTopo.length;
             };
-
             atualizarBanner();
-            if (bannersTopo.length > 1) {
-                setInterval(atualizarBanner, 4500);
-            }
+            if (bannersTopo.length > 1) setInterval(atualizarBanner, 4500);
         }
 
         function renderizarCards(lista) {
@@ -111,13 +104,9 @@
                 container.innerHTML = '<p style="color:#6b7280;">Nenhum comércio encontrado ainda. Seja o primeiro a anunciar!</p>';
                 return;
             }
-
             container.innerHTML = lista.map(item => {
                 const numLimpo = (item.whatsapp || '').replace(/\D/g, '');
-                const botaoWhats = numLimpo 
-                    ? `<a href="https://wa.me{numLimpo}" target="_blank" class="btn-whats">Chamar no WhatsApp</a>` 
-                    : '';
-
+                const botaoWhats = numLimpo ? `<a href="https://wa.me{numLimpo}" target="_blank" class="btn-whats">Chamar no WhatsApp</a>` : '';
                 return `
                     <div class="card-comercio">
                         <img src="${item.imagem_url}" alt="${item.titulo}">
@@ -134,8 +123,8 @@
 
         function filtrarAnuncios() {
             const termo = document.getElementById('campo-busca').value.toLowerCase();
-            const filtrados = todosAnuncios.filter(item => 
-                item.titulo.toLowerCase().includes(termo) || 
+            const filtrados = todosAnuncios.filter(item =>
+                item.titulo.toLowerCase().includes(termo) ||
                 item.categoria.toLowerCase().includes(termo) ||
                 (item.descricao && item.descricao.toLowerCase().includes(termo))
             );
@@ -152,18 +141,27 @@
             btn.disabled = true;
             btn.textContent = 'Salvando...';
 
-            const { error } = await db.from('newsletter').insert([{ nome, email }]);
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/newsletter`, {
+                    method: 'POST',
+                    headers: { ...HEADERS, 'Prefer': 'return=minimal' },
+                    body: JSON.stringify({ nome, email })
+                });
 
-            msg.style.display = 'block';
-            if (error) {
-                msg.textContent = error.code === '23505' 
-                    ? 'Este e-mail já está cadastrado na nossa lista!' 
-                    : 'Erro ao cadastrar. Tente novamente.';
+                msg.style.display = 'block';
+                if (res.ok) {
+                    msg.textContent = 'Cadastro realizado com sucesso! Você receberá nossas ofertas.';
+                    msg.style.color = '#ffffff';
+                    e.target.reset();
+                } else {
+                    const erro = await res.json();
+                    msg.textContent = erro.code === '23505' ? 'Este e-mail já está cadastrado!' : 'Erro ao salvar: ' + (erro.message || 'verifique o banco.');
+                    msg.style.color = '#fde047';
+                }
+            } catch (err) {
+                msg.style.display = 'block';
+                msg.textContent = 'Falha de conexão. Tente novamente.';
                 msg.style.color = '#fde047';
-            } else {
-                msg.textContent = 'Cadastro realizado com sucesso! Você receberá nossas ofertas.';
-                msg.style.color = '#ffffff';
-                e.target.reset();
             }
 
             btn.disabled = false;
